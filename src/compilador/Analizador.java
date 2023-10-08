@@ -4,11 +4,16 @@
  */
 package compilador;
 
+import static compilador.TablaSintaxis.Tokens.CorcheteApetura;
+import static compilador.TablaSintaxis.Tokens.CorcheteCierre;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -16,7 +21,14 @@ import java.util.StringTokenizer;
  */
 public class Analizador {
 
-    int Palabras_reservadas = 0, Palabras_usuario = 0, Numeros = 0, Parentesis = 0;
+    int Palabras_reservadas = 0, Palabras_usuario = 0, Numeros = 0;
+    int CorcheteApertura = 0, CorcheteCierre = 0, ParentesisApertura = 0,
+            ParentesisCierre = 0, CuadradoApertura = 0, CuadradoCierre = 0;
+    String Nombre_Package = "";
+    String Nombre_Class = "";
+
+    // Se inicializa la lista de Variables globales
+    ArrayList<VariablesGlobales> ListaVariables = new ArrayList<>();
 
     /*
  *  Metodo para analiza el txt entrante y dividirlo en linea por linea
@@ -24,22 +36,45 @@ public class Analizador {
  * @param  el nombre del fichero analizar.
      */
     public void lectura(String fichero) {
-
         try (BufferedReader br = new BufferedReader(new FileReader(fichero))) {
             String linea;
             int contador = 0;
 
             while ((linea = br.readLine()) != null) {
-                // Llama al método analizarSintacticamente para procesar la línea
+                // Salta las líneas que comienzan con "//" (comentarios)
+                if (linea.startsWith("//")) {
+                    continue;
+                }
+
+                //Validacion de <80 caracteres 
+                // Analiza sintácticamente la línea
                 analizarSintacticamente(linea);
+
+                // Clasifica la expresión de la línea
                 ClasificarExpresion(linea, contador);
-                
+
                 contador++;
             }
+
+            // Imprime las variables globales encontradas
+            for (VariablesGlobales objeto : ListaVariables) {
+                System.out.println("Tipo: " + objeto.getTipo() + ";  Nombre : " + objeto.getNombre());
+            }
+
+            //Validacion de Corchetes iguales
+            if (CorcheteApertura != CorcheteCierre) {
+                System.out.println(" \u001B[31m Error \u001B[0m, La cantidad de Corchetes de apertura y cierre no son la misma.");
+            }
+            // Imprime estadísticas
             System.out.println("**************Estadisticas***************** ");
             System.out.println("Palabras reservadas => " + Palabras_reservadas);
             System.out.println("Palabras usuario => " + Palabras_usuario);
-            System.out.println("Parentesis => " + Parentesis);
+            System.out.println("Corchete Apertura => " + CorcheteApertura);
+            System.out.println("Corchete Cierre => " + CorcheteCierre);
+            System.out.println("Parentesis Apertura => " + ParentesisApertura);
+            System.out.println("Parentesis Cierre => " + ParentesisCierre);
+            System.out.println("Cuadrado Apertura => " + CuadradoApertura);
+            System.out.println("Cuadrado Cierre => " + CuadradoCierre);
 
         } catch (FileNotFoundException e) {
             // Maneja el caso en el que el archivo no se encuentra
@@ -50,22 +85,22 @@ public class Analizador {
         }
     }
 
+
     /*
  *  Metodo para analiza una línea de texto y extrae y muestra cada token.
  *
  * @param  La línea de texto a analizar.
      */
     public void analizarSintacticamente(String linea) {
-
         // Variables a utilizar
         int contador = 0;
-        String Expresion = "";
+        boolean Clasificado = false;
 
-        boolean Clasificado = false, PalabraEncontrada = false;
-
+        // Salir del método si la línea está en blanco
         if (linea.trim().isEmpty()) {
-            return; // Salir del método si la línea está en blanco
+            return;
         }
+
         // Crear un StringTokenizer para dividir la línea en tokens
         StringTokenizer tokenizer = new StringTokenizer(linea);
 
@@ -73,19 +108,11 @@ public class Analizador {
         while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken();
 
-            // Se llama el metodo que clasifica los Tokens
+            // Se llama al método que clasifica los Tokens
             ClasificacionToken(token, Clasificado);
 
-            if (contador == 0) {
-                Expresion = Expresion + token;
-            } else {
-                Expresion = Expresion + " " + token;
-            }
             contador++;
         }
-
-       
-
     }
 
     /*
@@ -96,8 +123,6 @@ public class Analizador {
      * clasificado previamente
      */
     private void ClasificacionToken(String Token, boolean Clasificado) {
-        //variables de Tokens
-
         // Recorre todas las categorías de tokens en la tabla de sintaxis
         for (TablaSintaxis.Tokens match : TablaSintaxis.Tokens.values()) {
             // Verifica si el token ya ha sido clasificado
@@ -111,27 +136,52 @@ public class Analizador {
                 // Clasifica el token en función de su categoría
                 switch (match) {
                     case Reservada:
-                        //System.out.println(Token + " >> es una palabra reservada");
+                        // Incrementa el contador de palabras reservadas
                         Palabras_reservadas++;
                         Clasificado = true;
                         break;
                     case Numero:
-                        // System.out.println(Token + " >> es un numero");
+                        // Incrementa el contador de números
                         Numeros++;
                         Clasificado = true;
                         break;
                     case Palabra:
-                        //System.out.println(Token + " >> es una palabra del usuario");
+                        // Incrementa el contador de palabras del usuario
                         Palabras_usuario++;
                         Clasificado = true;
                         break;
-                    case Parentesis:
-                        // System.out.println(Token + " >> es un parentesis");
-                        Parentesis++;
+                    case CorcheteApetura:
+
+                        CorcheteApertura++;
+                        Clasificado = true;
+                        break;
+                    case CorcheteCierre:
+
+                        CorcheteCierre++;
+                        Clasificado = true;
+                        break;
+                    case ParentesisApertura:
+
+                        ParentesisApertura++;
+                        Clasificado = true;
+                        break;
+                    case ParentesisCierre:
+
+                        ParentesisCierre++;
+                        Clasificado = true;
+                        break;
+                    case CuadradosApertura:
+
+                        CuadradoApertura++;
+                        Clasificado = true;
+                        break;
+                    case CuadradosCierre:
+
+                        CuadradoCierre++;
                         Clasificado = true;
                         break;
                     default:
-                        System.out.println(Token + " >> no se clasifico en ninguna categoria");
+                        System.out.println(Token + " >> no se clasificó en ninguna categoría");
                         break;
                 }
             }
@@ -141,17 +191,68 @@ public class Analizador {
     private void ClasificarExpresion(String Expresion, int contador) {
         boolean resultado = false;
         Validaciones validacion = new Validaciones();
-        if (Expresion.contains("package")) {
+
+        //Verifica que la expresion no supere 80  caracteres
+        resultado = validacion.Validacion_80caracteres(Expresion, contador);
+        // Verifica si la expresión contiene "package"
+        if (Expresion.trim().contains("package")) {
             resultado = validacion.ValidarPackage(Expresion, contador);
-//            if (resultado) {
-//                System.out.println("Todo correcto");
-//            }
+            Nombre_Package = Expresion.substring(8, Expresion.length() - 1);
         }
-        if (Expresion.contains("import")) {
+
+        // Verifica si la expresión contiene "import"
+        if (Expresion.trim().contains("import")) {
             resultado = validacion.ValidarImport(Expresion, contador);
-//            if (resultado) {
-//                System.out.println("Todo correcto");
-//            }
+        }
+
+        // Verifica si la expresión es una declaración de "public class"
+        if (Expresion.trim().toLowerCase().contains("public class")) {
+            resultado = validacion.ValidarPublic_Class(Expresion, contador);
+            Nombre_Class = Expresion.substring(13, Expresion.length() - 1);
+            resultado = validacion.Validacion_Package_Main(contador, Nombre_Class, Nombre_Package);
+        }
+
+        // Verifica si la expresión comienza con "int"
+        if (Expresion.trim().toLowerCase().startsWith("int")) {
+            Pattern Patronint = Pattern.compile("int\\s+(\\w+)\\s*(=|;)");
+            Matcher matcher = Patronint.matcher(Expresion);
+            if (matcher.find()) {
+                String nombreVariable = matcher.group(1);
+                ListaVariables.add(new VariablesGlobales("int", nombreVariable));
+            }
+            resultado = validacion.ValidarINT(Expresion, contador);
+        }
+
+        // Verifica si la expresión comienza con "string" y procesa la declaración
+        if (Expresion.trim().toLowerCase().startsWith("string")) {
+            Pattern PatronString = Pattern.compile("String\\s+(\\w+)\\s*(=|;)");
+            Matcher matcher = PatronString.matcher(Expresion);
+            if (matcher.find()) {
+                String nombreVariable = matcher.group(1);
+                ListaVariables.add(new VariablesGlobales("String", nombreVariable));
+            }
+            resultado = validacion.ValidarString(Expresion, contador);
+        }
+
+        // Verifica si la expresión es una declaración de "public static void main"
+        if (Expresion.startsWith("public") && (Expresion.contains("main") || Expresion.contains("static"))) {
+            resultado = validacion.ValidarMain(Expresion, contador);
+        }
+
+        // Verifica si la expresión contiene "print", "println" o comienza con "System"
+        if (Expresion.contains("print") || Expresion.contains("println") || Expresion.trim().startsWith("System")) {
+            resultado = validacion.ValidarPrint(Expresion, contador, ListaVariables);
+        }
+
+        // Verifica si la expresión comienza con "boolean"
+        if (Expresion.trim().toLowerCase().startsWith("boolean")) {
+            Pattern Patronint = Pattern.compile("boolean\\s+(\\w+)\\s*(=|;)");
+            Matcher matcher = Patronint.matcher(Expresion);
+            if (matcher.find()) {
+                String nombreVariable = matcher.group(1);
+                ListaVariables.add(new VariablesGlobales("boolean", nombreVariable));
+            }
+            resultado = validacion.ValidarBoolean(Expresion, contador);
         }
     }
 
