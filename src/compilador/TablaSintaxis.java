@@ -9,21 +9,26 @@ package compilador;
  * @author kevin
  */
 public class TablaSintaxis {
-     enum Tokens 
-    {
+
+    enum Tokens {
         Reservada("\\b(abstract|assert|boolean|break|byte|case|"
                 + "catch|char|class|const|continue|default|do|double|else|enum|extends|"
                 + "false|final|finally|float|for|if|implements|import|instanceof|int|interface|long|"
-                + "native|new|null|package|private|protected|public|return|short|static|strictfp|super|switch|main|args|Scanner"
+                + "native|new|null|package|private|protected|public|return|short|static|strictfp|super|switch|main|args|Scanner|String|"
                 + "synchronized|this|throw|throws|transient|true|try|void|volatile|while)\\b"),
         Palabra("[A-Za-z]*"),
         Numero("[0-9]*"),
-        Parentesis("[(){}\\[\\]]");
-        
-        
+        CorcheteApetura("\\{\\]*"),
+        CorcheteCierre("}"),
+        ParentesisApertura("\\("),
+        ParentesisCierre("\\)"),
+        CuadradosApertura("\\["),
+        CuadradosCierre("\\]");
+
         public final String patron;
-        Tokens(String t){
-            this.patron =t;
+
+        Tokens(String t) {
+            this.patron = t;
         }
     }
 }

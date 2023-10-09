@@ -4,8 +4,6 @@
  */
 package compilador;
 
-import static compilador.TablaSintaxis.Tokens.CorcheteApetura;
-import static compilador.TablaSintaxis.Tokens.CorcheteCierre;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -42,7 +40,7 @@ public class Analizador {
 
             while ((linea = br.readLine()) != null) {
                 // Salta las líneas que comienzan con "//" (comentarios)
-                if (linea.startsWith("//")) {
+                if (linea.startsWith("//") || linea.startsWith("/**") || linea.startsWith("*") || linea.startsWith("*/")) {
                     continue;
                 }
 
@@ -71,10 +69,10 @@ public class Analizador {
             System.out.println("Palabras usuario => " + Palabras_usuario);
             System.out.println("Corchete Apertura => " + CorcheteApertura);
             System.out.println("Corchete Cierre => " + CorcheteCierre);
-            System.out.println("Parentesis Apertura => " + ParentesisApertura);
-            System.out.println("Parentesis Cierre => " + ParentesisCierre);
-            System.out.println("Cuadrado Apertura => " + CuadradoApertura);
-            System.out.println("Cuadrado Cierre => " + CuadradoCierre);
+//            System.out.println("Parentesis Apertura => " + ParentesisApertura);
+//            System.out.println("Parentesis Cierre => " + ParentesisCierre);
+//            System.out.println("Cuadrado Apertura => " + CuadradoApertura);
+//            System.out.println("Cuadrado Cierre => " + CuadradoCierre);
 
         } catch (FileNotFoundException e) {
             // Maneja el caso en el que el archivo no se encuentra
@@ -190,6 +188,7 @@ public class Analizador {
 
     private void ClasificarExpresion(String Expresion, int contador) {
         boolean resultado = false;
+        Expresion = Expresion.trim();
         Validaciones validacion = new Validaciones();
 
         //Verifica que la expresion no supere 80  caracteres
@@ -242,6 +241,22 @@ public class Analizador {
         // Verifica si la expresión contiene "print", "println" o comienza con "System"
         if (Expresion.contains("print") || Expresion.contains("println") || Expresion.trim().startsWith("System")) {
             resultado = validacion.ValidarPrint(Expresion, contador, ListaVariables);
+        }
+        // Verifica si la expresión contiene "break"
+        if (Expresion.contains("break")) {
+            resultado = validacion.ValidarBreak(Expresion, contador);
+        }
+        // Verifica si la expresión contiene "Scanner"
+        if (Expresion.contains("Scanner")) {
+            Pattern patron = Pattern.compile("Scanner\\s+(\\w+)\\s*=\\s*.*");
+            Matcher matcher = patron.matcher(Expresion);
+            String nombreVariable = "";
+            if (matcher.find()) {
+                nombreVariable = matcher.group(1);
+                // Aquí puedes usar nombreVariable como el nombre de la variable
+                ListaVariables.add(new VariablesGlobales("Scanner", nombreVariable));
+            }
+            resultado = validacion.ValidarScanner(Expresion, contador, nombreVariable);
         }
 
         // Verifica si la expresión comienza con "boolean"

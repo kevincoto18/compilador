@@ -1,13 +1,21 @@
-package Ejemplo ;
+public static void main(String[] args) {
+package CALCULADORA ;
+import java.util.Scanner;
 
+public class CALCULADORA {
 
+Scanner leer = new Scanner(System.in);
+int opcion=10;
+String Saludo = "Hola";
+boolean boleano = true;
 import Hola ;
-if
+System.out.println("Elige la operación que quieres realizar");
+System.out.println(Saludo);
+System.out.println("");
+System.out.println("Elige la operación que quieres realizar");
 
-{
+} 
 
 }
-[ ]
-(
-)
+
 
