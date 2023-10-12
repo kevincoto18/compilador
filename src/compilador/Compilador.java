@@ -5,6 +5,7 @@
 package compilador;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  *
@@ -27,7 +28,23 @@ public class Compilador {
         //System.out.println(rutatxt);
         Analizador analisis = new Analizador();
         analisis.lectura(nombretxt);
+      CrearTXTErrores(nombretxt);
 
+    }
+
+    public static void CrearTXTErrores(String fichero) {
+        fichero = fichero.replace(".txt", "_Errores.txt");
+        File archivo = new File(fichero);
+
+        try {
+            if (archivo.createNewFile()) {
+               // System.out.println("El archivo " + fichero + " ha sido creado exitosamente.");
+            } else {
+               // System.out.println("El archivo " + fichero + " ya existe.");
+            }
+        } catch (IOException e) {
+            System.err.println("Error al crear el archivo: " + e.getMessage());
+        }
     }
 
 }

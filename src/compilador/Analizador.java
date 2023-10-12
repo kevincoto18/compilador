@@ -21,7 +21,7 @@ public class Analizador {
 
     int Palabras_reservadas = 0, Palabras_usuario = 0, Numeros = 0;
     int CorcheteApertura = 0, CorcheteCierre = 0, ParentesisApertura = 0,
-            ParentesisCierre = 0, CuadradoApertura = 0, CuadradoCierre = 0;
+            ParentesisCierre = 0, CuadradoApertura = 0, CuadradoCierre = 0, Operadores=0;
     String Nombre_Package = "";
     String Nombre_Class = "";
 
@@ -37,38 +37,40 @@ public class Analizador {
         try (BufferedReader br = new BufferedReader(new FileReader(fichero))) {
             String linea;
             int contador = 0;
-
+            Validaciones validar = new Validaciones(fichero.replace(".txt", "_Errores.txt"));
+            validar.Validacion_Orden(fichero);
             while ((linea = br.readLine()) != null) {
+                validar.escribirLinea(fichero, linea, contador);
                 // Salta las líneas que comienzan con "//" (comentarios)
                 if (linea.startsWith("//") || linea.startsWith("/**") || linea.startsWith("*") || linea.startsWith("*/")) {
                     continue;
                 }
-
                 //Validacion de <80 caracteres 
                 // Analiza sintácticamente la línea
+
                 analizarSintacticamente(linea);
-
                 // Clasifica la expresión de la línea
-                ClasificarExpresion(linea, contador);
-
+                ClasificarExpresion(linea, contador, fichero);
                 contador++;
             }
 
             // Imprime las variables globales encontradas
-            for (VariablesGlobales objeto : ListaVariables) {
-                System.out.println("Tipo: " + objeto.getTipo() + ";  Nombre : " + objeto.getNombre());
-            }
-
             //Validacion de Corchetes iguales
             if (CorcheteApertura != CorcheteCierre) {
-                System.out.println(" \u001B[31m Error \u001B[0m, La cantidad de Corchetes de apertura y cierre no son la misma.");
+                System.out.println("----- ERROR -----, La cantidad de Corchetes de apertura y cierre no son la misma.");
             }
             // Imprime estadísticas
+            System.out.println("                                               ");
             System.out.println("**************Estadisticas***************** ");
             System.out.println("Palabras reservadas => " + Palabras_reservadas);
             System.out.println("Palabras usuario => " + Palabras_usuario);
             System.out.println("Corchete Apertura => " + CorcheteApertura);
             System.out.println("Corchete Cierre => " + CorcheteCierre);
+            System.out.println("Operadores Aritmeticos => " + Operadores);
+            System.out.println("**************Variables***************** ");
+            for (VariablesGlobales objeto : ListaVariables) {
+                System.out.println("Tipo: " + objeto.getTipo() + ";  Nombre : " + objeto.getNombre());
+            }
 //            System.out.println("Parentesis Apertura => " + ParentesisApertura);
 //            System.out.println("Parentesis Cierre => " + ParentesisCierre);
 //            System.out.println("Cuadrado Apertura => " + CuadradoApertura);
@@ -178,6 +180,10 @@ public class Analizador {
                         CuadradoCierre++;
                         Clasificado = true;
                         break;
+                    case Operadores:
+                        Operadores++;
+                        Clasificado = true;
+                        break;
                     default:
                         System.out.println(Token + " >> no se clasificó en ninguna categoría");
                         break;
@@ -186,10 +192,10 @@ public class Analizador {
         }
     }
 
-    private void ClasificarExpresion(String Expresion, int contador) {
+    private void ClasificarExpresion(String Expresion, int contador, String fichero) {
         boolean resultado = false;
         Expresion = Expresion.trim();
-        Validaciones validacion = new Validaciones();
+       Validaciones validacion = new Validaciones(fichero.replace(".txt", "_Errores.txt"));
 
         //Verifica que la expresion no supere 80  caracteres
         resultado = validacion.Validacion_80caracteres(Expresion, contador);
@@ -242,9 +248,19 @@ public class Analizador {
         if (Expresion.contains("print") || Expresion.contains("println") || Expresion.trim().startsWith("System")) {
             resultado = validacion.ValidarPrint(Expresion, contador, ListaVariables);
         }
+
         // Verifica si la expresión contiene "break"
-        if (Expresion.contains("break")) {
+        if (Expresion.startsWith("break")) {
             resultado = validacion.ValidarBreak(Expresion, contador);
+        }
+        // Verifica si la expresión contiene "switch"
+        if (Expresion.startsWith("switch")) {
+            resultado = validacion.ValidarSwitch(Expresion, contador, ListaVariables);
+        }
+
+        // Verifica si la expresión es una declaración de "nextLine" o "nextInt"
+        if (Expresion.contains("nextInt")) {
+            resultado = validacion.ValidarNextScanner(Expresion, contador, ListaVariables);
         }
         // Verifica si la expresión contiene "Scanner"
         if (Expresion.contains("Scanner")) {
@@ -268,6 +284,13 @@ public class Analizador {
                 ListaVariables.add(new VariablesGlobales("boolean", nombreVariable));
             }
             resultado = validacion.ValidarBoolean(Expresion, contador);
+        }
+
+        for (VariablesGlobales variables : ListaVariables) {
+            if (Expresion.startsWith(variables.getNombre()) && Expresion.contains("=") && (Expresion.contains("+") || Expresion.contains("-") || Expresion.contains("*")
+                    || Expresion.contains("/"))) {
+                validacion.ValidarAsignacion(Expresion, contador, ListaVariables);
+            }
         }
     }
 

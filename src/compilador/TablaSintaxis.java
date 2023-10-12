@@ -23,7 +23,8 @@ public class TablaSintaxis {
         ParentesisApertura("\\("),
         ParentesisCierre("\\)"),
         CuadradosApertura("\\["),
-        CuadradosCierre("\\]");
+        CuadradosCierre("\\]"),
+        Operadores("[-+/*]*");
 
         public final String patron;
 
