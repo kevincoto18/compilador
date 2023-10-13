@@ -21,7 +21,7 @@ public class Analizador {
 
     int Palabras_reservadas = 0, Palabras_usuario = 0, Numeros = 0;
     int CorcheteApertura = 0, CorcheteCierre = 0, ParentesisApertura = 0,
-            ParentesisCierre = 0, CuadradoApertura = 0, CuadradoCierre = 0, Operadores=0;
+            ParentesisCierre = 0, CuadradoApertura = 0, CuadradoCierre = 0, Operadores = 0;
     String Nombre_Package = "";
     String Nombre_Class = "";
 
@@ -47,7 +47,6 @@ public class Analizador {
                 }
                 //Validacion de <80 caracteres 
                 // Analiza sintácticamente la línea
-
                 analizarSintacticamente(linea);
                 // Clasifica la expresión de la línea
                 ClasificarExpresion(linea, contador, fichero);
@@ -195,7 +194,7 @@ public class Analizador {
     private void ClasificarExpresion(String Expresion, int contador, String fichero) {
         boolean resultado = false;
         Expresion = Expresion.trim();
-       Validaciones validacion = new Validaciones(fichero.replace(".txt", "_Errores.txt"));
+        Validaciones validacion = new Validaciones(fichero.replace(".txt", "_Errores.txt"));
 
         //Verifica que la expresion no supere 80  caracteres
         resultado = validacion.Validacion_80caracteres(Expresion, contador);
@@ -257,7 +256,10 @@ public class Analizador {
         if (Expresion.startsWith("switch")) {
             resultado = validacion.ValidarSwitch(Expresion, contador, ListaVariables);
         }
-
+        // Verifica si la expresión contiene "case"
+        if (Expresion.startsWith("case")) {
+            resultado = validacion.Validarcase(Expresion, contador);
+        }
         // Verifica si la expresión es una declaración de "nextLine" o "nextInt"
         if (Expresion.contains("nextInt")) {
             resultado = validacion.ValidarNextScanner(Expresion, contador, ListaVariables);
@@ -285,7 +287,7 @@ public class Analizador {
             }
             resultado = validacion.ValidarBoolean(Expresion, contador);
         }
-
+        //Validar asignacion de variables
         for (VariablesGlobales variables : ListaVariables) {
             if (Expresion.startsWith(variables.getNombre()) && Expresion.contains("=") && (Expresion.contains("+") || Expresion.contains("-") || Expresion.contains("*")
                     || Expresion.contains("/"))) {

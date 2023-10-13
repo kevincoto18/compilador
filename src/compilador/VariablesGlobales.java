@@ -8,6 +8,8 @@ package compilador;
  *
  * @author kevin
  */
+
+// Se utiliza para almacenar las variables y el tipo de variables
 public class VariablesGlobales {
     
     private String TipoVariable;

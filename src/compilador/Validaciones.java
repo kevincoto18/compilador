@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author kevin
+ * @author kevin coto
  */
 public class Validaciones {
 
@@ -25,49 +25,47 @@ public class Validaciones {
 
     public Validaciones(String archivoErrores) {
         this.archivoErrores = archivoErrores;
-         //redirectSystemOutToFile(archivoErrores); // Redirige System.out a tu archivo de errores
+        redirigirprints(archivoErrores); // Redirigir los println() al txt errores.
     }
+// Escritura del txt Errores
 
     public void escribirLinea(String nombreArchivo, String linea, int contador) {
         try {
             nombreArchivo = nombreArchivo.replace(".txt", "_Errores.txt");
-            FileWriter escritor = new FileWriter(nombreArchivo, true);  // El segundo parámetro true permite agregar al archivo existente
+            FileWriter escritor = new FileWriter(nombreArchivo, true);
 
             escritor.write(String.format("%04d", contador) + " - " + linea + "\n");  // Agrega la línea al archivo
 
             escritor.close();  // Cierra el archivo después de escribir
-
-            // System.out.println("Línea escrita en el archivo " + nombreArchivo);
         } catch (IOException e) {
-            // System.err.println("Error al escribir en el archivo: " + e.getMessage());
         }
     }
-
-    //Validaciones Generales
+// aqui se valida la longitud de 80 caracteres
     public boolean Validacion_80caracteres(String Linea, int contador) {
         try {
-            String Error = "";
             if (Linea.replaceAll(" ", "").length() >= 80) {
-                System.out.println(" Error , en la linea " + formatearContador(contador) + " supera mas de 80 caracteres");
+                // Se imprime un mensaje de error indicando la línea y se retorna falso.
+                System.out.println("Error, en la línea " + formatearContador(contador) + " supera más de 80 caracteres");
                 return false;
             }
-
         } catch (Exception e) {
+            
             return false;
         }
         return true;
     }
 
-    // aqui se validara le orden del package, imports, y el main
-   public boolean Validacion_Orden(String fichero) {
+// aqui se valida el orden de package, import, main, class...
+public boolean Validacion_Orden(String fichero) {
     try (BufferedReader br = new BufferedReader(new FileReader(fichero))) {
         String Linea = "";
         int continuidad = 0;
-        boolean bloqueComentario = false; // Variable para rastrear si estamos dentro de un comentario de bloque
+        boolean bloqueComentario = false; // Variable para identifiacar un comentario de bloque
 
         while ((Linea = br.readLine()) != null) {
             Linea = Linea.trim(); // Elimina espacios en blanco al inicio y al final
 
+            // Verificar si estamos dentro de un comentario de bloque y continuar
             if (bloqueComentario) {
                 if (Linea.contains("*/")) {
                     bloqueComentario = false;
@@ -75,19 +73,23 @@ public class Validaciones {
                 continue;
             }
 
+            // Comprobar si comenzamos un comentario de bloque y continuar
             if (Linea.startsWith("/*")) {
                 bloqueComentario = true;
                 continue;
             }
 
-            if (Linea.startsWith("//")) {
-                continue; // Saltar líneas de comentarios de una sola línea
+            // Saltar líneas de comentarios de una sola línea
+            if (Linea.startsWith("//") || Linea.startsWith("*")) {
+                continue;
             }
 
+            // Saltar líneas en blanco
             if (Linea.isEmpty()) {
-                continue; // Saltar líneas en blanco
+                continue;
             }
 
+            // Validar el orden de las sentencias
             switch (continuidad) {
                 case 0:
                     if (Linea.contains("package")) {
@@ -131,10 +133,11 @@ public class Validaciones {
     return true;
 }
 
-
+//  Se valida que el package y el main sean iguales
     public boolean Validacion_Package_Main(int contador, String Pack, String clase) {
-        clase = clase.trim();  // Elimina espacios en blanco alrededor de la clase
-        Pack = Pack.trim();    // Elimina espacios en blanco alrededor del package
+        // Elimina espacios en blanco 
+        clase = clase.trim();  
+        Pack = Pack.trim();    
 
         if (!clase.equals(Pack)) {
             System.out.println("----- ERROR -----, en la línea " + contador + ", el public class y el package no son iguales.");
@@ -143,10 +146,10 @@ public class Validaciones {
             return true;
         }
     }
-
+    // Valida el package
     public boolean ValidarPackage(String Linea, int contador) {
         try {
-            // Extrae el nombre del package eliminando el "package " y el ";"
+            // Extrae el nombre del package 
             String packagename = Linea.substring(8, Linea.length() - 1).trim();
 
             // Verifica si la línea termina con un punto y coma (;)
@@ -171,7 +174,7 @@ public class Validaciones {
         }
         return true;
     }
-
+    // Valida el import
     public boolean ValidarImport(String Linea, int contador) {
         try {
             // Verifica si la línea termina con un punto y coma (;)
@@ -194,7 +197,7 @@ public class Validaciones {
             return false;
         }
     }
-
+    // Valida le public class
     public boolean ValidarPublic_Class(String Linea, int contador) {
 
         try {
@@ -220,7 +223,7 @@ public class Validaciones {
             return false;
         }
     }
-
+    //Valida el main
     public boolean ValidarMain(String Linea, int contador) {
         try {
             // Verificar si la línea inicia con "public"
@@ -264,7 +267,7 @@ public class Validaciones {
             return false;
         }
     }
-
+    //Valida le print
     public boolean ValidarPrint(String Linea, int contador, ArrayList<VariablesGlobales> ListaVariables) {
         try {
             // Verificar si la línea inicia con "System"
@@ -390,7 +393,23 @@ public class Validaciones {
             return false;
         }
     }
-    //Validar expresion Break;
+        public boolean Validarcase(String Linea, int contador) {
+        try {
+            // Verificar si la línea inicia con "System"
+            if (!Linea.startsWith("case")) {
+                System.out.println("----- ERROR -----, en la linea " + formatearContador(contador) + " Java es sensible a mayúsculas y minúsculas, ¿quisiste decir: 'case'?");
+                return false;
+            }
+            if (!Linea.endsWith(":")) {
+                System.out.println("----- ERROR -----, en la linea " + formatearContador(contador) + " falta el ':' al final de la expresion.");
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    //Validar la asignacion de variables;
 
     public boolean ValidarAsignacion(String Linea, int contador, ArrayList<VariablesGlobales> ListaVariables) {
         try {
@@ -444,7 +463,7 @@ public class Validaciones {
             return false;
         }
     }
-
+    //Valida el nextScanner
     public boolean ValidarNextScanner(String Linea, int contador, ArrayList<VariablesGlobales> ListaVariables) {
         try {
             // Verificar si la línea termina con un punto y coma (;)
@@ -602,14 +621,17 @@ public class Validaciones {
     private String formatearContador(int contador) {
         return String.format("%04d", contador);
     }
-
-    private void redirectSystemOutToFile(String archivoErrores) {
+// Metodo para redirigir los println al archivo txt
+    private void redirigirprints(String archivoErrores) {
         try {
-            PrintStream fileOut = new PrintStream(new FileOutputStream(archivoErrores, true));
-            System.setOut(fileOut);
-        } catch (FileNotFoundException e) {
-            //System.err.println("Error al redirigir System.out a archivo: " + e.getMessage());
-        }
+        // Crear un nuevo flujo de salida hacia el archivo especificado en modo de apertura (append)
+        PrintStream fileOut = new PrintStream(new FileOutputStream(archivoErrores, true));
+        
+        // Establecer el flujo de salida estándar (System.out) para que apunte al archivo
+        System.setOut(fileOut);
+    } catch (FileNotFoundException e) {
+       
+    }
     }
 
 }
