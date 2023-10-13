@@ -24,7 +24,8 @@ public class TablaSintaxis {
         ParentesisCierre("\\)"),
         CuadradosApertura("\\["),
         CuadradosCierre("\\]"),
-        Operadores("[-+/*]*");
+        Operadores("[-+/*]*"),
+        igualdad("[=]*");
 
         public final String patron;
 

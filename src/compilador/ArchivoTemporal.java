@@ -42,6 +42,7 @@ public class ArchivoTemporal {
 
             escritor.close();  // Cierra el archivo después de escribir
         } catch (IOException e) {
+            System.err.println("Error al escribir en el archivo temporal");
         }
     }
     // metodo para leer el .java
@@ -54,7 +55,11 @@ public class ArchivoTemporal {
                 EscribirTXT(fichero, linea);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error al leer el archivo .java");
+            System.err.println("Consejos: ");
+            System.err.println("1 - Verifica que el archivo exista");
+            System.err.println("2 - Verifica que el archivo este en la misma carpeta del .jar");
+            System.err.println("3 - Verifica que el nombre del archivo sea el mismo\n");
         }
     }
 

@@ -6,7 +6,6 @@ package compilador;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.temporal.Temporal;
 
 /**
  *
@@ -20,8 +19,16 @@ public class Compilador {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-
-        String nombretxt = "ejemplo.java";
+        String nombretxt = "";
+        if(args.length>0)
+        {
+          nombretxt = args[0];
+        }
+        if(args.length<1)
+        {
+            System.err.println("Error general, no se ingreso el archivo de entrada");
+            return;
+        }
         if(!nombretxt.endsWith(".java"))
         {
             System.err.println("Error general, el archivo tiene que tener extension .java");
@@ -45,7 +52,7 @@ public class Compilador {
         //elimina el .txt temporal
         temporal.BorrarTemporarl("ejemplo.txt");
       
-      
+        System.err.println("\nEjecucion finalizada, verifica la salida del sistema en: " + errores +"\n");
 
     }
 
@@ -60,7 +67,7 @@ public class Compilador {
                // System.out.println("El archivo " + fichero + " ya existe.");
             }
         } catch (IOException e) {
-            System.err.println("Error al crear el archivo: " + e.getMessage());
+            System.err.println("Error al crear el archivo de errores: " + e.getMessage());
         }
     }
     

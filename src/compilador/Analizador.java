@@ -15,13 +15,13 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author kevin
+ * @author kevin coto
  */
 public class Analizador {
 
     int Palabras_reservadas = 0, Palabras_usuario = 0, Numeros = 0;
     int CorcheteApertura = 0, CorcheteCierre = 0, ParentesisApertura = 0,
-            ParentesisCierre = 0, CuadradoApertura = 0, CuadradoCierre = 0, Operadores = 0;
+            ParentesisCierre = 0, CuadradoApertura = 0, CuadradoCierre = 0, Operadores = 0,igualdad=0;
     String Nombre_Package = "";
     String Nombre_Class = "";
 
@@ -66,14 +66,15 @@ public class Analizador {
             System.out.println("Corchete Apertura => " + CorcheteApertura);
             System.out.println("Corchete Cierre => " + CorcheteCierre);
             System.out.println("Operadores Aritmeticos => " + Operadores);
+            System.out.println("Parentesis Apertura => " + ParentesisApertura);
+            System.out.println("Parentesis Cierre => " + ParentesisCierre);
+            System.out.println("Cuadrado Apertura => " + CuadradoApertura);
+            System.out.println("Cuadrado Cierre => " + CuadradoCierre);
+            
             System.out.println("**************Variables***************** ");
             for (VariablesGlobales objeto : ListaVariables) {
-                System.out.println("Tipo: " + objeto.getTipo() + ";  Nombre : " + objeto.getNombre());
+                System.out.println("Nombre : " + objeto.getNombre() +" | Tipo : " + objeto.getTipo() );
             }
-//            System.out.println("Parentesis Apertura => " + ParentesisApertura);
-//            System.out.println("Parentesis Cierre => " + ParentesisCierre);
-//            System.out.println("Cuadrado Apertura => " + CuadradoApertura);
-//            System.out.println("Cuadrado Cierre => " + CuadradoCierre);
 
         } catch (FileNotFoundException e) {
             // Maneja el caso en el que el archivo no se encuentra
@@ -181,6 +182,10 @@ public class Analizador {
                         break;
                     case Operadores:
                         Operadores++;
+                        Clasificado = true;
+                        break;
+                    case igualdad:
+                        igualdad++;
                         Clasificado = true;
                         break;
                     default:

@@ -38,6 +38,7 @@ public class Validaciones {
 
             escritor.close();  // Cierra el archivo después de escribir
         } catch (IOException e) {
+            System.err.println("Error, no se pudo escribir en el archivo Errores");
         }
     }
 // aqui se valida la longitud de 80 caracteres
